@@ -308,7 +308,7 @@ install_deps()
   echo "Installing YCM package"
   YCM_URL_TAG="YCM_PACKAGE_URL_${_PLATFORM_RELEASE}"
   wget ${!YCM_URL_TAG} -O /tmp/ycm.deb
-  DEBIAN_FRONTEND=noninteractive; sudo dpkg -i /tmp/ycm.deb
+  DEBIAN_FRONTEND=noninteractive; sudo dpkg --ignore-depends=libjs-sphinxdoc -i /tmp/ycm.deb; sudo apt-get install -f
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install ycm"
