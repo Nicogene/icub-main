@@ -72,6 +72,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y git
         sudo apt-get install -y lsb-release
+        sudo apt-get install build-essential
 
     - uses: actions/checkout@master
 
@@ -92,6 +93,7 @@ jobs:
       shell: bash
       run: |
         chmod +x ./.ci/create_icub-main_deb.sh
+        export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
         ./.ci/create_icub-main_deb.sh
         echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
 
@@ -139,6 +141,7 @@ jobs:
         apt-get update
         apt-get install -y git
         apt-get install -y lsb-release
+        apt-get install build-essential
 
     - uses: actions/checkout@master
 
@@ -159,6 +162,7 @@ jobs:
       shell: bash
       run: |
         chmod +x ./.ci/create_icub-main_deb.sh
+        export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
         ./.ci/create_icub-main_deb.sh
         echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
 
