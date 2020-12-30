@@ -376,6 +376,7 @@ fix_relocatable_files(){
   ICUB_INI_PATH="$D_ICUB_INSTALL_DIR/usr/share/yarp/config/path.d"
   ICUB_INI_FILE="iCub.ini"
 
+  echo "Fixing iCub.ini in path.d"
   # this fixes missing iCub.ini file
   if [ ! -e "${ICUB_INI_PATH}/${ICUB_INI_FILE}" ]
   then
@@ -386,14 +387,14 @@ fix_relocatable_files(){
     echo [search iCub] >> ${ICUB_INI_PATH}/${ICUB_INI_FILE}
     echo path "/usr/share/iCub">> ${ICUB_INI_PATH}/${ICUB_INI_FILE}
   fi
-  # Fix path inside cmake files
+  echo "Fix path inside cmake files"
   #sudo /$ICUB_SCRIPT_DIR/fix_cmake_path.sh $ICUB_BUILD_CHROOT/$D_ICUB_INSTALL_DIR $D_ICUB_INSTALL_DIR
   _cmake_files=$(find ${D_ICUB_INSTALL_DIR} -name *.cmake)
   for f in $_cmake_files ; do
     sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
   done
 
-  # Fix path inside  ini files
+  echo "Fix path inside  ini files"
   _ini_files=$(find ${D_ICUB_INSTALL_DIR} -name *.ini)
   for f in $_ini_files ; do
     sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
