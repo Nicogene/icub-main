@@ -283,15 +283,15 @@ install_deps()
   echo "Installing CMAKE in the environment"
   case "$_PLATFORM_RELEASE" in
     "bionic")
-      wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
+      wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
       apt-add-repository 'deb https://apt.kitware.com/ubuntu/ $_PLATFORM_RELEASE main'
-      DEBIAN_FRONTEND=noninteractive; apt-get install $APT_OPTIONS cmake && touch /tmp/cmake.done
+      DEBIAN_FRONTEND=noninteractive; sudo apt-get install $APT_OPTIONS cmake
       ;;
     "buster")
-      DEBIAN_FRONTEND=noninteractive; apt-get $APT_OPTIONS -t buster-backports install $APT_OPTIONS cmake
+      DEBIAN_FRONTEND=noninteractive; sudo apt-get $APT_OPTIONS -t buster-backports install $APT_OPTIONS cmake
       ;;
     "focal")
-      DEBIAN_FRONTEND=noninteractive; apt-get install $APT_OPTIONS cmake
+      DEBIAN_FRONTEND=noninteractive; sudo apt-get install $APT_OPTIONS cmake
       ;;
     *)
       echo "ERROR: unsupported distro $_PLATFORM_RELEASE"
@@ -308,7 +308,7 @@ install_deps()
   echo "Installing YCM package"
   YCM_URL_TAG="YCM_PACKAGE_URL_${_PLATFORM_RELEASE}"
   wget ${!YCM_URL_TAG} -O /tmp/ycm.deb
-  DEBIAN_FRONTEND=noninteractive; dpkg -i /tmp/ycm.deb
+  DEBIAN_FRONTEND=noninteractive; sudo dpkg -i /tmp/ycm.deb
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install ycm"
@@ -319,7 +319,7 @@ install_deps()
   echo "Installing icub-common dependencies in the environment"
   DEP_TAG="ICUB_DEPS_${_PLATFORM_RELEASE}"
   _DEPENDENCIES="$ICUB_DEPS_COMMON ${!DEP_TAG}"
-  DEBIAN_FRONTEND=noninteractive; apt-get install $APT_OPTIONS $_DEPENDENCIES
+  DEBIAN_FRONTEND=noninteractive; sudo apt-get install $APT_OPTIONS $_DEPENDENCIES
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install dependencies"
@@ -333,7 +333,7 @@ install_deps()
   echo "Installing YARP package"
   YARP_URL_TAG="YARP_PACKAGE_URL_${_PLATFORM_RELEASE}"
   wget ${!YARP_URL_TAG} -O /tmp/yarp.deb
-  DEBIAN_FRONTEND=noninteractive; dpkg -i /tmp/yarp.deb
+  DEBIAN_FRONTEND=noninteractive; sudo dpkg -i /tmp/yarp.deb
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install yarp"
