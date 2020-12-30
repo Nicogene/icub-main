@@ -32,9 +32,12 @@ VARS_FILE="${SCRIPT_PATH}/packages_vars.sh"
 _WHO_AM_I=$(whoami)
 _EQUIVS_BIN=$(which equivs-build || true)
 _LSB_BIN=$(which lsb_release || true)
-_PLATFORM_KEY=""
+__PLATFORM_RELEASE=""
 _PLATFORM_HARDWARE=""
 _CONTROL_FILE=""
+ICUB_SCRIPT_DIR=$(pwd)
+ICUB_REPO_URL="https://github.com/robotology/icub-main.git"
+
 # #####################################################
 
 print_defs ()
@@ -52,7 +55,7 @@ print_defs ()
   echo "  _WHO_AM_I is $_WHO_AM_I"
   echo "  _EQUIVS_BIN is $_EQUIVS_BIN"
   echo "  _LSB_BIN is $_LSB_BIN"
-  echo "  _PLATFORM_KEY is $_PLATFORM_KEY"
+  echo "  __PLATFORM_RELEASE is $__PLATFORM_RELEASE"
   echo "  _PLATFORM_HARDWARE is $_PLATFORM_HARDWARE"
   echo "  _CONTROL_FILE is $_CONTROL_FILE "
 }
@@ -161,7 +164,7 @@ init()
       ;;
   esac
 
-  _CONTROL_FILE="icub-common.${_PLATFORM_RELEASE}-${PLATFORM_HARDWARE}.control"
+  _CONTROL_FILE="icub.${_PLATFORM_RELEASE}-${PLATFORM_HARDWARE}.control"
 
   if [ "$PACKAGE_VERSION" == "" ]; then
     exit_err "Package version string is empty"
@@ -184,11 +187,10 @@ init()
 
 fini()
 {
-  if [ -f "$_CONTROL_FILE" ]; then
-    rm "$_CONTROL_FILE"
-  fi
-
-  log "$0 ${COL_OK}ENDED"
+  export ICUB_MAIN_PACKAGE_NAME="iCub${ICUB_PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${PLATFORM_RELEASE}.deb"
+  echo $ICUB_MAIN_PACKAGE_NAME > ICUB_COMMON_PACKAGE_NAME.txt
+  ls
+  log "${COL_OK}${ICUB_COMMON_PACKAGE_NAME} CREATED"
 }
 
 check_and_install_deps()
@@ -222,45 +224,189 @@ check_and_install_deps()
   fi
 }
 
-create_control_file()
-{
-  _ICUB_COMMON_DEPENDENCIES=""
-  for dep in $ICUB_DEPS_COMMON ; do
-    if [ "$_ICUB_COMMON_DEPENDENCIES" == "" ]; then
-      _ICUB_COMMON_DEPENDENCIES="$dep"
-    else
-      _ICUB_COMMON_DEPENDENCIES="${_ICUB_COMMON_DEPENDENCIES}, $dep"
-    fi
-  done
-  _PLAT_DEPS_TAG="ICUB_DEPS_${_PLATFORM_RELEASE}"
-  for pdep in ${!_PLAT_DEPS_TAG} ; do
-    if [ "$_ICUB_COMMON_DEPENDENCIES" == "" ]; then
-      _ICUB_COMMON_DEPENDENCIES="$pdep"
-    else
-      _ICUB_COMMON_DEPENDENCIES="${_ICUB_COMMON_DEPENDENCIES}, $pdep"
-    fi
-  done
-  echo "Package: icub-common
-Version: ${PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${_PLATFORM_RELEASE}
-Section: contrib/science
-Priority: optional
-Architecture: $_PLATFORM_HARDWARE
-Depends: $_ICUB_COMMON_DEPENDENCIES, cmake (>=${CMAKE_MIN_REQ_VER})
-Homepage: http://www.icub.org
-Maintainer: ${ICUB_PACKAGE_MAINTAINER}
-Description: List of dependencies for iCub software (metapackage)
- This metapackage lists all the dependencies needed to install the icub platform software or to download the source code and compile it directly onto your machine." | tee $_CONTROL_FILE
-
-}
 
 create_deb()
 {
-  $_EQUIVS_BIN $_CONTROL_FILE
+  # Generate dpkg DEBIAN folder
+  mkdir -p ${D_ICUB_INSTALL_DIR}/DEBIAN
+  # Generate 'conffiles' file
+  touch ${D_ICUB_INSTALL_DIR}/DEBIAN/conffiles
+
+  # Generate dpkg DEBIAN/control file
+  touch ${D_ICUB_INSTALL_DIR}/DEBIAN/control
+  mkdir -p ${D_ICUB_INSTALL_DIR}/usr/share/doc/icub
+  cp ${D_ICUB_ROOT}/COPYING ${D_ICUB_INSTALL_DIR}/usr/share/doc/icub/copyright
+  cp ${D_ICUB_ROOT}/AUTHORS ${D_ICUB_INSTALL_DIR}/usr/share/doc/icub/AUTHORS
+  touch ${D_ICUB_INSTALL_DIR}/DEBIAN/md5sums
+
+  _CONTROL_FILE=${D_ICUB_INSTALL_DIR}/DEBIAN/control
+
+  SIZE=$(du -s $D_ICUB_INSTALL_DIR/)
+  SIZE=$(echo $SIZE | awk '{ split($0, array, "/" ); print array[1] }')
+  echo "Size: $SIZE"
+  echo "Package: icub
+ Version: ${PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${_PLATFORM_RELEASE}
+ Section: contrib/science
+ Priority: optional
+ Architecture: $_PLATFORM_HARDWARE
+ Depends: icub-common (= ${ICUB_PACKAGE_VERSION}~${_PLATFORM_RELEASE}), yarp (>= ${YARP_REQUIRED_VERSION})
+ Installed-Size:  $SIZE
+ Homepage: http://www.icub.org
+ Maintainer: ${ICUB_PACKAGE_MAINTAINER}
+ Description:Software platform for iCub humanoid robot with simulator.
+ The iCub is the humanoid robot developed as part of the European project
+ RobotCub and subsequently adopted by more than 20 laboratories worldwide.
+ It has 53 motors that move the head, arms & hands, waist, and legs. It can
+ see and hear, it has the sense of proprioception and movement.
+ .
+ This package provides the standard iCub software platform and apps to
+ interact with the real iCub robot, or with the included simulator." | tee $_CONTROL_FILE
+  # Build package
+  export ICUB_MAIN_PACKAGE_NAME="iCub${ICUB_PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${PLATFORM_RELEASE}.deb"
+  cd ${D_ICUB_INSTALL_DIR} && dpkg -b ${D_ICUB_INSTALL_DIR} $ICUB_MAIN_PACKAGE_NAME
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to build the package"
+    exit 1
+  fi
+  echo "Installing package $ICUB_MAIN_PACKAGE_NAME"
+  dpkg -i ${D_ICUB_INSTALL_DIR}/$ICUB_MAIN_PACKAGE_NAME
+  if [ "$?" != "0" ]; then
+    echo "Error: installing the package"
+    exit 1
+  fi
+
+}
+
+install_deps()
+{
+  ###------------------- Handle cmake ----------------------###
+  echo "Installing CMAKE in the environment"
+  case "$_PLATFORM_RELEASE" in
+    "bionic")
+      wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add -
+      apt-add-repository 'deb https://apt.kitware.com/ubuntu/ $_PLATFORM_RELEASE main'
+      DEBIAN_FRONTEND=noninteractive; apt-get install $APT_OPTIONS cmake && touch /tmp/cmake.done
+      ;;
+    "buster")
+      DEBIAN_FRONTEND=noninteractive; apt-get $APT_OPTIONS -t buster-backports install $APT_OPTIONS cmake
+      ;;
+    "focal")
+      DEBIAN_FRONTEND=noninteractive; apt-get install $APT_OPTIONS cmake
+      ;;
+    *)
+      echo "ERROR: unsupported distro $_PLATFORM_RELEASE"
+      exit 1
+      ;;
+  esac
+
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to install cmake"
+    exit 1
+  fi
+
+###------------------- Handle YCM ----------------------###
+  echo "Installing YCM package"
+  YCM_URL_TAG="YCM_PACKAGE_URL_${_PLATFORM_RELEASE}"
+  wget ${!YCM_URL_TAG} -O /tmp/ycm.deb
+  DEBIAN_FRONTEND=noninteractive; dpkg -i /tmp/ycm.deb
+
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to install ycm"
+    exit 1
+  fi
+
+###----------- Handle iCub deps from icub-common -------###
+  echo "Installing icub-common dependencies in the environment"
+  DEP_TAG="ICUB_DEPS_${_PLATFORM_RELEASE}"
+  _DEPENDENCIES="$ICUB_DEPS_COMMON ${!DEP_TAG}"
+  DEBIAN_FRONTEND=noninteractive; apt-get install $APT_OPTIONS $_DEPENDENCIES
+
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to install dependencies"
+    exit 1
+  fi
+
+###------------------- Handle IpOpt --------------------###
+## It seems already handeled by sudo apt install coinor-libipopt-dev
+
+###------------------- Handle YARP --------------------###
+  echo "Installing YARP package"
+  YARP_URL_TAG="YARP_PACKAGE_URL_${_PLATFORM_RELEASE}"
+  wget ${!YARP_URL_TAG} -O /tmp/yarp.deb
+  DEBIAN_FRONTEND=noninteractive; dpkg -i /tmp/yarp.deb
+
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to install yarp"
+    exit 1
+  fi
+}
+
+build_icub() {
+
+  mkdir $ICUB_SCRIPT_DIR/sources && cd $ICUB_SCRIPT_DIR/sources
+  echo "Cloning icub sources from ${ICUB_REPO_URL}"
+  git clone $ICUB_REPO_URL
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to clone icub repositoy from ${ICUB_REPO_URL}"
+    exit 1
+  fi
+  cd icub-main
+  export D_ICUB_ROOT=$(pwd)
+  git checkout v$ICUB_PACKAGE_VERSION
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to checkout to v$ICUB_PACKAGE_VERSION"
+    exit 1
+  fi
+
+  mkdir build && cd build
+
+  CMAKE_OPTIONS_TAG="CMAKE_OPTIONS_${PLATFORM_KEY}"
+  _SPECIAL_DIST_CMAKE_OPTIONS="${!CMAKE_OPTIONS_TAG}"
+  export D_ICUB_INSTALL_DIR=$(pwd)/install
+  cmake ICUB_CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=$D_ICUB_INSTALL_DIR/usr ..
+
+  make -j && make install
+  if [ "$?" != "0" ]; then
+    echo "Error: unable to checkout to build and/or install icub-main"
+    exit 1
+  fi
+}
+
+fix_relocatable_files(){
+  ICUB_INI_PATH="$D_ICUB_INSTALL_DIR/usr/share/yarp/config/path.d"
+  ICUB_INI_FILE="iCub.ini"
+
+  # this fixes missing iCub.ini file
+  if [ ! -e "${ICUB_INI_PATH}/${ICUB_INI_FILE}" ]
+  then
+    mkdir -p $ICUB_INI_PATH
+    ls  $ICUB_INI_PATH
+    touch ${ICUB_INI_PATH}/${ICUB_INI_FILE}
+    echo ###### This file is automatically generated by CMake. >> ${ICUB_INI_PATH}/${ICUB_INI_FILE}
+    echo [search iCub] >> ${ICUB_INI_PATH}/${ICUB_INI_FILE}
+    echo path "/usr/share/iCub">> ${ICUB_INI_PATH}/${ICUB_INI_FILE}
+  fi
+  # Fix path inside cmake files
+  #sudo /$ICUB_SCRIPT_DIR/fix_cmake_path.sh $ICUB_BUILD_CHROOT/$D_ICUB_INSTALL_DIR $D_ICUB_INSTALL_DIR
+  _cmake_files=$(find ${D_ICUB_INSTALL_DIR} -name *.cmake)
+  for f in $_cmake_files ; do
+    sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
+  done
+
+  # Fix path inside  ini files
+  _ini_files=$(find ${D_ICUB_INSTALL_DIR} -name *.ini)
+  for f in $_ini_files ; do
+    sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
+  done
+
 }
 
 main()
 {
-  create_control_file
+  install_deps
+  build_icub
+  # Probably this step is not needed anymore after cmake components/modernization
+  fix_relocatable_files
   create_deb
 }
 
