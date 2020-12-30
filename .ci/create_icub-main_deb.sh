@@ -36,7 +36,8 @@ __PLATFORM_RELEASE=""
 _PLATFORM_HARDWARE=""
 _CONTROL_FILE=""
 ICUB_SCRIPT_DIR=$(pwd)
-ICUB_REPO_URL="https://github.com/robotology/icub-main.git"
+#TO BE CHANGED!!!
+ICUB_REPO_URL="https://github.com/Nicogene/icub-main.git"
 
 # #####################################################
 
