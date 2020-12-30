@@ -282,9 +282,9 @@ install_deps()
   ###------------------- Handle cmake ----------------------###
   echo "Installing CMAKE in the environment"
   case "$_PLATFORM_RELEASE" in
-    "bionic")
+    "")
       wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
-      sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ $_PLATFORM_RELEASE main'
+      sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
       DEBIAN_FRONTEND=noninteractive; sudo apt-get install $APT_OPTIONS cmake
       ;;
     "buster")
