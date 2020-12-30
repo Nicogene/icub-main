@@ -166,7 +166,7 @@ init()
 
   _CONTROL_FILE="icub.${_PLATFORM_RELEASE}-${PLATFORM_HARDWARE}.control"
 
-  if [ "$PACKAGE_VERSION" == "" ]; then
+  if [ "$ICUB_PACKAGE_VERSION" == "" ]; then
     exit_err "Package version string is empty"
   fi
 
