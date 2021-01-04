@@ -262,18 +262,15 @@ create_deb()
  This package provides the standard iCub software platform and apps to
  interact with the real iCub robot, or with the included simulator." | tee $_CONTROL_FILE
 
+  echo "Start control file"
   cat $_CONTROL_FILE
+  echo "End control file"
   # Build package
   export ICUB_MAIN_PACKAGE_NAME="iCub${ICUB_PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${PLATFORM_RELEASE}.deb"
+  echo $ICUB_MAIN_PACKAGE_NAME
   cd ${D_ICUB_INSTALL_DIR} && dpkg -b ${D_ICUB_INSTALL_DIR} $ICUB_MAIN_PACKAGE_NAME
   if [ "$?" != "0" ]; then
     echo "Error: unable to build the package"
-    exit 1
-  fi
-  echo "Installing package $ICUB_MAIN_PACKAGE_NAME"
-  dpkg -i ${D_ICUB_INSTALL_DIR}/$ICUB_MAIN_PACKAGE_NAME
-  if [ "$?" != "0" ]; then
-    echo "Error: installing the package"
     exit 1
   fi
 
