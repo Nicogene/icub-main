@@ -96,6 +96,10 @@ jobs:
         chmod +x ./.ci/create_icub-main_deb.sh
         export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
         ./.ci/create_icub-main_deb.sh
+        echo "PWD: $(pwd)"
+        ls
+        cat ICUB_MAIN_PACKAGE_NAME.txt
+        echo "fine"
         echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
 
 
