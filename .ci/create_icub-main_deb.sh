@@ -245,7 +245,7 @@ create_deb()
   SIZE=$(echo $SIZE | awk '{ split($0, array, "/" ); print array[1] }')
   echo "Size: $SIZE"
   echo "Package: icub
- Version: ${PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${_PLATFORM_RELEASE}
+ Version: ${ICUB_PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${_PLATFORM_RELEASE}
  Section: contrib/science
  Priority: optional
  Architecture: $_PLATFORM_HARDWARE
@@ -261,6 +261,8 @@ create_deb()
  .
  This package provides the standard iCub software platform and apps to
  interact with the real iCub robot, or with the included simulator." | tee $_CONTROL_FILE
+
+  cat $_CONTROL_FILE
   # Build package
   export ICUB_MAIN_PACKAGE_NAME="iCub${ICUB_PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${PLATFORM_RELEASE}.deb"
   cd ${D_ICUB_INSTALL_DIR} && dpkg -b ${D_ICUB_INSTALL_DIR} $ICUB_MAIN_PACKAGE_NAME
@@ -363,7 +365,7 @@ build_icub() {
   CMAKE_OPTIONS_TAG="CMAKE_OPTIONS_${PLATFORM_KEY}"
   _SPECIAL_DIST_CMAKE_OPTIONS="${!CMAKE_OPTIONS_TAG}"
   export D_ICUB_INSTALL_DIR=$(pwd)/install
-  cmake ICUB_CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=$D_ICUB_INSTALL_DIR/usr ..
+  cmake $ICUB_CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=$D_ICUB_INSTALL_DIR/usr ..
 
   make -j && make install
   if [ "$?" != "0" ]; then
@@ -389,11 +391,8 @@ fix_relocatable_files(){
   fi
   echo "Fix path inside cmake files"
   #sudo /$ICUB_SCRIPT_DIR/fix_cmake_path.sh $ICUB_BUILD_CHROOT/$D_ICUB_INSTALL_DIR $D_ICUB_INSTALL_DIR
-  echo "find ${D_ICUB_INSTALL_DIR} -name *.cmake"
   _cmake_files=$(find ${D_ICUB_INSTALL_DIR} -name "*.cmake")
-  echo $_cmake_files
   for f in $_cmake_files ; do
-    echo "MAMMAMIA $f"
     sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
   done
 
