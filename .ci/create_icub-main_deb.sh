@@ -182,6 +182,12 @@ init()
     exit_err "Distro $_PLATFORM_HARDWARE is not supported, we support only $SUPPORTED_TARGET_LIST"
   fi
 
+  if [ "$_WHO_AM_I" != "root" ]; then
+    sudo apt-get update
+  else
+    apt-get update
+  fi
+
   log "$0 ${COL_OK}STARTED"
 }
 
@@ -198,14 +204,12 @@ check_and_install_deps()
   export DEBIAN_FRONTEND=noninteractive
 
   if [ "$_WHO_AM_I" != "root" ]; then
-    sudo apt-get update
-  else
-    apt-get update
+    export _SUDO=sudo
   fi
   if [ "$_LSB_BIN" == "" ]; then
     if [ "$_WHO_AM_I" != "root" ]; then
       log "installing lsb_release, so we may need your password"
-      sudo apt-get install -y lsb-release
+      $_SUDO apt-get install -y lsb-release
     else
       log "installing lsb_release"
       apt-get install -y lsb-release
@@ -215,7 +219,7 @@ check_and_install_deps()
   if [ "$_EQUIVS_BIN" == "" ]; then
     if [ "$_WHO_AM_I" != "root" ]; then
       log "installing equivs, so we may need your password"
-      sudo apt-get install -y equivs
+      $_SUDO apt-get install -y equivs
     else
       log "installing equivs"
       apt-get install -y equivs
@@ -282,15 +286,15 @@ install_deps()
   echo "Installing CMAKE in the environment"
   case "$_PLATFORM_RELEASE" in
     "bionic")
-      wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add -
-      sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
-      DEBIAN_FRONTEND=noninteractive; sudo apt-get install $APT_OPTIONS cmake
+      wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | $_SUDO apt-key add -
+      $_SUDO apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+      DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
       ;;
     "buster")
-      DEBIAN_FRONTEND=noninteractive; sudo apt-get $APT_OPTIONS -t buster-backports install $APT_OPTIONS cmake
+      DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get $APT_OPTIONS -t buster-backports install $APT_OPTIONS cmake
       ;;
     "focal")
-      DEBIAN_FRONTEND=noninteractive; sudo apt-get install $APT_OPTIONS cmake
+      DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
       ;;
     *)
       echo "ERROR: unsupported distro $_PLATFORM_RELEASE"
@@ -307,7 +311,7 @@ install_deps()
   echo "Installing YCM package"
   YCM_URL_TAG="YCM_PACKAGE_URL_${_PLATFORM_RELEASE}"
   wget ${!YCM_URL_TAG} -O /tmp/ycm.deb
-  DEBIAN_FRONTEND=noninteractive; sudo dpkg --ignore-depends=libjs-sphinxdoc -i /tmp/ycm.deb; sudo apt-get install -f
+  DEBIAN_FRONTEND=noninteractive; $_SUDO dpkg --ignore-depends=libjs-sphinxdoc -i /tmp/ycm.deb; $_SUDO apt-get install -f
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install ycm"
@@ -318,7 +322,7 @@ install_deps()
   echo "Installing icub-common dependencies in the environment"
   DEP_TAG="ICUB_DEPS_${_PLATFORM_RELEASE}"
   _DEPENDENCIES="$ICUB_DEPS_COMMON ${!DEP_TAG}"
-  DEBIAN_FRONTEND=noninteractive; sudo apt-get install $APT_OPTIONS $_DEPENDENCIES
+  DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS $_DEPENDENCIES
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install dependencies"
@@ -326,13 +330,13 @@ install_deps()
   fi
 
 ###------------------- Handle IpOpt --------------------###
-## It seems already handeled by sudo apt install coinor-libipopt-dev
+## It seems already handeled by $_SUDO apt install coinor-libipopt-dev
 
 ###------------------- Handle YARP --------------------###
   echo "Installing YARP package"
   YARP_URL_TAG="YARP_PACKAGE_URL_${_PLATFORM_RELEASE}"
   wget ${!YARP_URL_TAG} -O /tmp/yarp.deb
-  DEBIAN_FRONTEND=noninteractive; sudo dpkg -i /tmp/yarp.deb
+  DEBIAN_FRONTEND=noninteractive; $_SUDO dpkg -i /tmp/yarp.deb
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install yarp"
@@ -387,7 +391,7 @@ fix_relocatable_files(){
     echo path "/usr/share/iCub">> ${ICUB_INI_PATH}/${ICUB_INI_FILE}
   fi
   echo "Fix path inside cmake files"
-  #sudo /$ICUB_SCRIPT_DIR/fix_cmake_path.sh $ICUB_BUILD_CHROOT/$D_ICUB_INSTALL_DIR $D_ICUB_INSTALL_DIR
+  #$_SUDO /$ICUB_SCRIPT_DIR/fix_cmake_path.sh $ICUB_BUILD_CHROOT/$D_ICUB_INSTALL_DIR $D_ICUB_INSTALL_DIR
   _cmake_files=$(find ${D_ICUB_INSTALL_DIR} -name "*.cmake")
   for f in $_cmake_files ; do
     sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
