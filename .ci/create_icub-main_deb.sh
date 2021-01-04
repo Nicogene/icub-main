@@ -187,8 +187,8 @@ init()
 
 fini()
 {
-  export ICUB_MAIN_PACKAGE_NAME="iCub${ICUB_PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${PLATFORM_RELEASE}.deb"
-  echo $ICUB_MAIN_PACKAGE_NAME > ICUB_MAIN_PACKAGE_NAME.txt
+  echo $ICUB_MAIN_PACKAGE_NAME > /home/runner/work/icub-main/icub-main/ICUB_MAIN_PACKAGE_NAME.txt
+  mv $ICUB_MAIN_PACKAGE_NAME /home/runner/work/icub-main/icub-main
   ls
   log "${COL_OK}${ICUB_MAIN_PACKAGE_NAME} CREATED"
 }
