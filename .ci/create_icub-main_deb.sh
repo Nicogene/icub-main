@@ -253,14 +253,14 @@ Depends: icub-common (= ${ICUB_PACKAGE_VERSION}~${_PLATFORM_RELEASE}), yarp (>= 
 Installed-Size:  $SIZE
 Homepage: http://www.icub.org
 Maintainer: ${ICUB_PACKAGE_MAINTAINER}
-Description:Software platform for iCub humanoid robot with simulator.
-The iCub is the humanoid robot developed as part of the European project
-RobotCub and subsequently adopted by more than 20 laboratories worldwide.
-It has 53 motors that move the head, arms & hands, waist, and legs. It can
-see and hear, it has the sense of proprioception and movement.
-.
-This package provides the standard iCub software platform and apps to
-interact with the real iCub robot, or with the included simulator." | tee $_CONTROL_FILE
+Description: Software platform for iCub humanoid robot with simulator.
+ The iCub is the humanoid robot developed as part of the European project
+ RobotCub and subsequently adopted by more than 20 laboratories worldwide.
+ It has 53 motors that move the head, arms & hands, waist, and legs. It can
+ see and hear, it has the sense of proprioception and movement.
+ .
+ This package provides the standard iCub software platform and apps to
+ interact with the real iCub robot, or with the included simulator." | tee $_CONTROL_FILE
 
   echo "Start control file"
   cat $_CONTROL_FILE
