@@ -390,7 +390,7 @@ fix_relocatable_files(){
   echo "Fix path inside cmake files"
   #sudo /$ICUB_SCRIPT_DIR/fix_cmake_path.sh $ICUB_BUILD_CHROOT/$D_ICUB_INSTALL_DIR $D_ICUB_INSTALL_DIR
   echo "find ${D_ICUB_INSTALL_DIR} -name *.cmake"
-  _cmake_files=$(find ${D_ICUB_INSTALL_DIR} -name *.cmake)
+  _cmake_files=$(find ${D_ICUB_INSTALL_DIR} -name "*.cmake")
   echo $_cmake_files
   for f in $_cmake_files ; do
     echo "MAMMAMIA $f"
@@ -398,7 +398,7 @@ fix_relocatable_files(){
   done
 
   echo "Fix path inside  ini files"
-  _ini_files=$(find ${D_ICUB_INSTALL_DIR} -name *.ini)
+  _ini_files=$(find ${D_ICUB_INSTALL_DIR} -name "*.ini")
   for f in $_ini_files ; do
     sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
   done
