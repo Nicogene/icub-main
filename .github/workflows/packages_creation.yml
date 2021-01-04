@@ -72,8 +72,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y git
         sudo apt-get install -y lsb-release
-        sudo apt-get install build-essential
-        sudo apt-get install qml-module-qt-labs-folderlistmodel qml-module-qt-labs-settings libopenni2-dev libi2c-dev libv4l-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-tools libgraphviz-dev libqcustomplot-dev
+        sudo apt-get install -y build-essential
+        sudo apt-get install -y qml-module-qt-labs-folderlistmodel qml-module-qt-labs-settings libopenni2-dev libi2c-dev libv4l-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-tools libgraphviz-dev libqcustomplot-dev
 
     - uses: actions/checkout@master
 
@@ -96,10 +96,6 @@ jobs:
         chmod +x ./.ci/create_icub-main_deb.sh
         export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
         ./.ci/create_icub-main_deb.sh
-        echo "PWD: $(pwd)"
-        ls
-        cat ICUB_MAIN_PACKAGE_NAME.txt
-        echo "fine"
         echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
 
 
@@ -146,8 +142,8 @@ jobs:
         apt-get update
         apt-get install -y git
         apt-get install -y lsb-release
-        apt-get install build-essential
-        sudo apt-get install qml-module-qt-labs-folderlistmodel qml-module-qt-labs-settings libopenni2-dev libi2c-dev libv4l-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-tools libgraphviz-dev libqcustomplot-dev
+        apt-get install -y build-essential
+        apt-get install -y qml-module-qt-labs-folderlistmodel qml-module-qt-labs-settings libopenni2-dev libi2c-dev libv4l-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-tools libgraphviz-dev libqcustomplot-dev
 
     - uses: actions/checkout@master
 
