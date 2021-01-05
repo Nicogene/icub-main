@@ -22,17 +22,6 @@ jobs:
       id: get_latest_tag
       uses: WyriHaximus/github-action-get-previous-tag@0.2.0
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
-
     - name: create version file
       shell: bash
       run: |
@@ -45,7 +34,26 @@ jobs:
         name: ICUB_PACKAGE_VERSION.txt
         path: ./ICUB_PACKAGE_VERSION.txt
 
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
 
+    - name: create upload URL file
+      shell: bash
+      run: echo ${{ steps.create_release.outputs.upload_url }} > UPLOAD_URL.txt
+
+    - name: upload url file
+      uses: actions/upload-artifact@v2
+      with:
+        name: UPLOAD_URL.txt
+        path: ./UPLOAD_URL.txt
 
 # end job "preliminary-steps"
 # start job "normal-build"
@@ -90,12 +98,22 @@ jobs:
         ./.ci/create_icub-main_deb.sh
         echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
 
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: UPLOAD_URL.txt
+
+    - name: read upload url
+      id: read_upload_url
+      shell: bash
+      run: echo ::set-output name=UPLOAD_URL::$( cat UPLOAD_URL.txt )
+
     - name: Upload Release Asset icub-common
       uses: actions/upload-release-asset@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.read_upload_url.outputs.UPLOAD_URL }}
         asset_path: ./${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_name: ${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_content_type: application/vnd.debian.binary-package
@@ -105,7 +123,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.read_upload_url.outputs.UPLOAD_URL }}
         asset_path: ./${{ steps.package_generation_icub-main.outputs.ICUB_MAIN_PACKAGE_NAME }}
         asset_name: ${{ steps.package_generation_icub-main.outputs.ICUB_MAIN_PACKAGE_NAME }}
         asset_content_type: application/vnd.debian.binary-package
@@ -156,12 +174,21 @@ jobs:
         ./.ci/create_icub-main_deb.sh
         echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
 
+    - uses: actions/download-artifact@v2
+      with:
+        name: UPLOAD_URL.txt
+
+    - name: read upload url
+      id: read_upload_url
+      shell: bash
+      run: echo ::set-output name=UPLOAD_URL::$( cat UPLOAD_URL.txt )
+
     - name: Upload Release asset icub-common
       uses: actions/upload-release-asset@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.read_upload_url.outputs.UPLOAD_URL }}
         asset_path: ./${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_name: ${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_content_type: application/vnd.debian.binary-package
@@ -170,7 +197,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.read_upload_url.outputs.UPLOAD_URL }}
         asset_path: ./${{ steps.package_generation_icub-main.outputs.ICUB_MAIN_PACKAGE_NAME }}
         asset_name: ${{ steps.package_generation_icub-main.outputs.ICUB_MAIN_PACKAGE_NAME }}
         asset_content_type: application/vnd.debian.binary-package
@@ -188,5 +215,6 @@ jobs:
         with:
           name: |
             ICUB_PACKAGE_VERSION.txt
+            UPLOAD_URL.txt
 
 # end job "clenup-steps"
