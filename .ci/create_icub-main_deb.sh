@@ -193,8 +193,8 @@ init()
 
 fini()
 {
-  echo $ICUB_MAIN_PACKAGE_NAME > /home/runner/work/icub-main/icub-main/ICUB_MAIN_PACKAGE_NAME.txt
-  mv $ICUB_MAIN_PACKAGE_NAME /home/runner/work/icub-main/icub-main
+  echo $ICUB_MAIN_PACKAGE_NAME > ${ICUB_SCRIPT_DIR}/ICUB_MAIN_PACKAGE_NAME.txt
+  mv $ICUB_MAIN_PACKAGE_NAME ${ICUB_SCRIPT_DIR}
   ls
   log "${COL_OK}${ICUB_MAIN_PACKAGE_NAME} CREATED"
 }
@@ -266,9 +266,6 @@ Description: Software platform for iCub humanoid robot with simulator.
  This package provides the standard iCub software platform and apps to
  interact with the real iCub robot, or with the included simulator." | tee $_CONTROL_FILE
 
-  echo "Start control file"
-  cat $_CONTROL_FILE
-  echo "End control file"
   # Build package
   export ICUB_MAIN_PACKAGE_NAME="iCub${ICUB_PACKAGE_VERSION}-${ICUB_DEBIAN_REVISION_NUMBER}~${_PLATFORM_RELEASE}.deb"
   echo $ICUB_MAIN_PACKAGE_NAME
@@ -337,7 +334,6 @@ install_deps()
 
 build_icub() {
 
-  mkdir $ICUB_SCRIPT_DIR/sources && cd $ICUB_SCRIPT_DIR/sources
   echo "Cloning icub sources from ${ICUB_REPO_URL}"
   git clone $ICUB_REPO_URL
   if [ "$?" != "0" ]; then
@@ -382,7 +378,6 @@ fix_relocatable_files(){
     echo path "/usr/share/iCub">> ${ICUB_INI_PATH}/${ICUB_INI_FILE}
   fi
   echo "Fix path inside cmake files"
-  #$_SUDO /$ICUB_SCRIPT_DIR/fix_cmake_path.sh $ICUB_BUILD_CHROOT/$D_ICUB_INSTALL_DIR $D_ICUB_INSTALL_DIR
   _cmake_files=$(find ${D_ICUB_INSTALL_DIR} -name "*.cmake")
   for f in $_cmake_files ; do
     sed -i "s|$D_ICUB_INSTALL_DIR||g" $f
