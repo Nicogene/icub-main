@@ -284,23 +284,14 @@ install_deps()
 {
   ###------------------- Handle cmake ----------------------###
   echo "Installing CMAKE in the environment"
-  case "$_PLATFORM_RELEASE" in
-    "bionic")
-      wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | $_SUDO apt-key add -
-      $_SUDO apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
-      DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
-      ;;
-    "buster")
-      DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get $APT_OPTIONS -t buster-backports install $APT_OPTIONS cmake
-      ;;
-    "focal")
-      DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
-      ;;
-    *)
-      echo "ERROR: unsupported distro $_PLATFORM_RELEASE"
-      exit 1
-      ;;
-  esac
+
+  if [ "$_PLATFORM_RELEASE" == "bionic" ]; then
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | $_SUDO apt-key add -
+    $_SUDO apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+    DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
+  else
+    DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
+  fi
 
   if [ "$?" != "0" ]; then
     echo "Error: unable to install cmake"
