@@ -22,6 +22,17 @@ jobs:
       id: get_latest_tag
       uses: WyriHaximus/github-action-get-previous-tag@0.2.0
 
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: false
+
     - name: create version file
       shell: bash
       run: |
@@ -34,16 +45,7 @@ jobs:
         name: ICUB_PACKAGE_VERSION.txt
         path: ./ICUB_PACKAGE_VERSION.txt
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
+
 
 # end job "preliminary-steps"
 # start job "normal-build"
