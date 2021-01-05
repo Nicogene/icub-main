@@ -142,7 +142,7 @@ jobs:
         apt-get update
         apt-get install -y git
         apt-get install -y lsb-release
-        apt-get install -y build-essential
+        apt-get install -y build-essential wget
         apt-get install -y qml-module-qt-labs-folderlistmodel qml-module-qt-labs-settings libopenni2-dev libi2c-dev libv4l-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-tools libgraphviz-dev libqcustomplot-dev
 
     - uses: actions/checkout@master
