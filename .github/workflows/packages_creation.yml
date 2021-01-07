@@ -47,7 +47,8 @@ jobs:
 
     - name: create upload URL file
       shell: bash
-      run: echo ${{ steps.create_release.outputs.upload_url }} > UPLOAD_URL.txt
+      run: |
+           echo ${{ steps.create_release.outputs.upload_url }} > UPLOAD_URL.txt
            cat UPLOAD_URL.txt
 
     - name: upload url file
@@ -89,7 +90,8 @@ jobs:
     - name: read upload url
       id: read_upload_url
       shell: bash
-      run: echo ::set-output name=UPLOAD_URL::$( cat UPLOAD_URL.txt )
+      run: |
+           echo ::set-output name=UPLOAD_URL::$( cat UPLOAD_URL.txt )
            cat UPLOAD_URL.txt
 
     - name: Generate icub-common metapackage
