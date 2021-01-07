@@ -51,8 +51,6 @@ jobs:
 
     - name: install deps
       shell: bash
-      environment:
-
       run: |
         apt update
         apt install -y git
