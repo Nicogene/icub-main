@@ -342,6 +342,7 @@ build_icub() {
   #fi
   cd ${ICUB_SCRIPT_DIR}
   echo "AAAAAAA $ICUB_SCRIPT_DIR"
+  ls -la
   export D_ICUB_ROOT=$(pwd)
   git checkout v$ICUB_PACKAGE_VERSION
   if [ "$?" != "0" ]; then
