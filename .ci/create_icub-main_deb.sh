@@ -349,7 +349,7 @@ build_icub() {
     echo "Fixinig missing git folder"
     git init
     # TO BE FIXED
-    git remote add robotology https://github.com/Nicogene/icub-main.git
+    git remote add origin https://github.com/Nicogene/icub-main.git
     git fetch origin
   fi
   ls -la
