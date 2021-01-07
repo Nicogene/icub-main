@@ -43,8 +43,8 @@ jobs:
       matrix:
         docker_image:
           #- "debian:buster"
-          - "ubuntu:bionic"
-          #- "ubuntu:focal"
+          #- "ubuntu:bionic"
+          - "ubuntu:focal"
     container:
       image: ${{ matrix.docker_image }}
     steps:
