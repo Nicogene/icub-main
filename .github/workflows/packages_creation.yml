@@ -1,11 +1,9 @@
 name: Packages creation
 
 on:
-  push:
-    tags:
-    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-    # branches:
-    #   - master
+    release:
+      types:
+        - created
 
 jobs:
 # start job "preliminary-steps"
@@ -34,29 +32,6 @@ jobs:
         name: ICUB_PACKAGE_VERSION.txt
         path: ./ICUB_PACKAGE_VERSION.txt
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: true
-        prerelease: false
-
-    - name: create upload URL file
-      shell: bash
-      run: |
-           echo ${{ steps.create_release.outputs.upload_url }} > UPLOAD_URL.txt
-           cat UPLOAD_URL.txt
-
-    - name: upload url file
-      uses: actions/upload-artifact@v2
-      with:
-        name: UPLOAD_URL.txt
-        path: ./UPLOAD_URL.txt
-
 # end job "preliminary-steps"
 # start job "normal-build"
   normal-build:
@@ -83,17 +58,6 @@ jobs:
       with:
         name: ICUB_PACKAGE_VERSION.txt
 
-    - uses: actions/download-artifact@v2
-      with:
-        name: UPLOAD_URL.txt
-
-    - name: read upload url
-      id: read_upload_url
-      shell: bash
-      run: |
-           echo ::set-output name=UPLOAD_URL::$( cat UPLOAD_URL.txt )
-           cat UPLOAD_URL.txt
-
     - name: Generate icub-common metapackage
       id: package_generation_icub-common
       shell: bash
@@ -108,7 +72,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.read_upload_url.outputs.UPLOAD_URL }}
+        upload_url: ${{ github.event.release.upload_url }}
         asset_path: ./${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_name: ${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_content_type: application/vnd.debian.binary-package
@@ -129,7 +93,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.read_upload_url.outputs.UPLOAD_URL }}
+        upload_url: ${{ github.event.release.upload_url }}
         asset_path: ./${{ steps.package_generation_icub-main.outputs.ICUB_MAIN_PACKAGE_NAME }}
         asset_name: ${{ steps.package_generation_icub-main.outputs.ICUB_MAIN_PACKAGE_NAME }}
         asset_content_type: application/vnd.debian.binary-package
@@ -144,6 +108,8 @@ jobs:
       matrix:
         docker_image:
           - "debian:buster"
+          - "ubuntu:bionic"
+          - "ubuntu:focal"
     container:
       image: ${{ matrix.docker_image }}
     steps:
