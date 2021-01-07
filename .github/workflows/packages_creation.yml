@@ -48,6 +48,7 @@ jobs:
     - name: create upload URL file
       shell: bash
       run: echo ${{ steps.create_release.outputs.upload_url }} > UPLOAD_URL.txt
+           cat UPLOAD_URL.txt
 
     - name: upload url file
       uses: actions/upload-artifact@v2
@@ -81,24 +82,6 @@ jobs:
       with:
         name: ICUB_PACKAGE_VERSION.txt
 
-    - name: Generate icub-common metapackage
-      id: package_generation_icub-common
-      shell: bash
-      run: |
-        chmod +x ./.ci/create_icub-common_deb.sh
-        export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
-        ./.ci/create_icub-common_deb.sh
-        echo ::set-output name=ICUB_COMMON_PACKAGE_NAME::$( cat ICUB_COMMON_PACKAGE_NAME.txt )
-    - name: Generate icub package
-      id: package_generation_icub-main
-      shell: bash
-      run: |
-        chmod +x ./.ci/create_icub-main_deb.sh
-        export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
-        ./.ci/create_icub-main_deb.sh
-        echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
-
-
     - uses: actions/download-artifact@v2
       with:
         name: UPLOAD_URL.txt
@@ -107,6 +90,16 @@ jobs:
       id: read_upload_url
       shell: bash
       run: echo ::set-output name=UPLOAD_URL::$( cat UPLOAD_URL.txt )
+           cat UPLOAD_URL.txt
+
+    - name: Generate icub-common metapackage
+      id: package_generation_icub-common
+      shell: bash
+      run: |
+        chmod +x ./.ci/create_icub-common_deb.sh
+        export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
+        ./.ci/create_icub-common_deb.sh
+        echo ::set-output name=ICUB_COMMON_PACKAGE_NAME::$( cat ICUB_COMMON_PACKAGE_NAME.txt )
 
     - name: Upload Release Asset icub-common
       uses: actions/upload-release-asset@master
@@ -117,6 +110,17 @@ jobs:
         asset_path: ./${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_name: ${{ steps.package_generation_icub-common.outputs.ICUB_COMMON_PACKAGE_NAME }}
         asset_content_type: application/vnd.debian.binary-package
+
+    - name: Generate icub package
+      id: package_generation_icub-main
+      shell: bash
+      run: |
+        chmod +x ./.ci/create_icub-main_deb.sh
+        export ICUB_PACKAGE_VERSION=$(cat ICUB_PACKAGE_VERSION.txt)
+        ./.ci/create_icub-main_deb.sh
+        echo ::set-output name=ICUB_MAIN_PACKAGE_NAME::$( cat ICUB_MAIN_PACKAGE_NAME.txt )
+
+
 
     - name: Upload Release Asset icub-main
       uses: actions/upload-release-asset@master
