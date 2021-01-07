@@ -344,6 +344,15 @@ build_icub() {
   echo "AAAAAAA $ICUB_SCRIPT_DIR"
   ls -la
   export D_ICUB_ROOT=$(pwd)
+  # Fix missing .git folder
+  if [ ! -d ./.git ]; then
+    echo "Fixinig missing git folder"
+    git init
+    # TO BE FIXED
+    git remote add robotology https://github.com/Nicogene/icub-main.git
+    git fetch origin
+  fi
+  ls -la
   git checkout v$ICUB_PACKAGE_VERSION
   if [ "$?" != "0" ]; then
     echo "Error: unable to checkout to v$ICUB_PACKAGE_VERSION"
