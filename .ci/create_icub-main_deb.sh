@@ -36,6 +36,7 @@ __PLATFORM_RELEASE=""
 _PLATFORM_HARDWARE=""
 _CONTROL_FILE=""
 ICUB_SCRIPT_DIR=$(pwd)
+ICUB_REPO_URL="https://github.com/Nicogene/icub-main.git" # TO BE FIXED!
 
 
 # #####################################################
@@ -334,25 +335,12 @@ install_deps()
 
 build_icub() {
 
-  #echo "Cloning icub sources from ${ICUB_REPO_URL}"
-  #git clone $ICUB_REPO_URL
-  #if [ "$?" != "0" ]; then
-  #  echo "Error: unable to clone icub repositoy from ${ICUB_REPO_URL}"
-  #  exit 1
-  #fi
+  echo "Cloning icub sources from ${ICUB_REPO_URL}"
+
   cd ${ICUB_SCRIPT_DIR}
-  echo "AAAAAAA $ICUB_SCRIPT_DIR"
-  ls -la
+  git clone $ICUB_REPO_URL
+  cd icub-main
   export D_ICUB_ROOT=$(pwd)
-  # Fix missing .git folder
-  if [ ! -d ./.git ]; then
-    echo "Fixinig missing git folder"
-    git init
-    # TO BE FIXED
-    git remote add origin https://github.com/Nicogene/icub-main.git
-    git fetch origin
-  fi
-  ls -la
   git checkout v$ICUB_PACKAGE_VERSION
   if [ "$?" != "0" ]; then
     echo "Error: unable to checkout to v$ICUB_PACKAGE_VERSION"
