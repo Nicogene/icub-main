@@ -58,8 +58,8 @@ jobs:
         apt install -y build-essential wget software-properties-common
         apt install -y libsqlite3-dev qml-module-qt-labs-folderlistmodel qml-module-qt-labs-settings libopenni2-dev libi2c-dev libv4l-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-tools libgraphviz-dev libqcustomplot-dev
       env:
-        TZ=Italy/Rome
-        DEBIAN_FRONTEND=noninteractive
+        TZ: Italy/Rome
+        DEBIAN_FRONTEND: noninteractive
     - uses: actions/checkout@master
 
     - uses: actions/download-artifact@v2
