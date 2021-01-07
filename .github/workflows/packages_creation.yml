@@ -39,12 +39,12 @@ jobs:
     needs: [preliminary-steps]
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         docker_image:
-          - "debian:buster"
+          #- "debian:buster"
           - "ubuntu:bionic"
-          - "ubuntu:focal"
+          #- "ubuntu:focal"
     container:
       image: ${{ matrix.docker_image }}
     steps:
