@@ -284,17 +284,14 @@ install_deps()
   echo "Installing CMAKE in the environment"
 
   if [ "$_PLATFORM_RELEASE" == "bionic" ]; then
-    echo "AAAAA"
     wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | $_SUDO apt-key add -
     $_SUDO apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
     DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
-  elif [ "$PLATFORM_KEY" == "buster" ]; then
-    echo "BBBBBBB"
+  elif [ "$_PLATFORM_RELEASE" == "buster" ]; then
     $_SUDO apt-add-repository 'deb http://deb.debian.org/debian buster-backports main'
     DEBIAN_FRONTEND=noninteractive;
     $_SUDO apt-get -y update && $_SUDO apt-get -y install -t buster-backports cmake
   else
-    echo "CCCCCCCC"
     DEBIAN_FRONTEND=noninteractive; $_SUDO apt-get install $APT_OPTIONS cmake
   fi
 
